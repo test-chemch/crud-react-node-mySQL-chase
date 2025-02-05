@@ -1,9 +1,9 @@
-version: '3.8'
 
 services:
+
+
   db:
-    image: mariadb:10.6
-    platform: linux/arm64/v8
+    image: mysql/mysql-server:5.7 
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: test
@@ -12,7 +12,16 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql # Initialization script
+      - ./db_creation/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD", "mysql", "-u", "root", "-p", "password" ]
+      interval: 10s
+      timeout: 8s
+      retries: 5
+
+
+
+
 
   backend:
     build:
@@ -27,6 +36,10 @@ services:
     depends_on:
       - db
 
+
+
+
+
   frontend:
     environment:
       - PORT=5173
@@ -36,6 +49,9 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+
+
+
 
 volumes:
   db-data:
